@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: root
+      TZ: Asia/Tokyo
+    ports:
+      - 3306:3306
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./db/mysql_data:/var/lib/mysql
+
+  nextjs:
+    image: node:latest
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: /bin/sh -c 'npm i && npm run dev'
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mysql
+
+  nestjs:
+    image: node:latest
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: npm run start
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:
